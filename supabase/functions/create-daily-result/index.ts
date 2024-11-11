@@ -42,6 +42,11 @@ serve(async (req) => {
 
       if (spendListError) throw spendListError
 
+      if (spendList.length === 0) {
+        console.log('🐬 No Spend Data / User Name', user.nickname)
+        continue
+      }
+
       let dailySummaryAmount = 0
 
       for (const spend of spendList) {
