@@ -1,0 +1,29 @@
+{
+  "version": "0.2.0",
+  "compilerOptions": {
+    "allowJs": true,
+    "lib": ["deno.window"],
+    "strict": true
+  },
+  "lint": {
+    "files": {
+      "include": ["supabase/"]
+    },
+    "rules": {
+      "tags": ["recommended"]
+    }
+  },
+  "fmt": {
+    "files": {
+      "include": ["supabase/"]
+    },
+    "options": {
+      "useTabs": false,
+      "lineWidth": 1000,
+      "semiColons": false,
+      "indentWidth": 2,
+      "singleQuote": true,
+      "proseWrap": "always"
+    }
+  }
+}

@@ -1,0 +1,8 @@
+seed.sql
+config.toml
+dewbee-functions.code-workspace
+
+.DS_Store
+.temp
+.vscode
+node_modules
