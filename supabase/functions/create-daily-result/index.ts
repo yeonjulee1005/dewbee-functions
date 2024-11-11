@@ -1,25 +1,47 @@
-// Follow this setup guide to integrate the Deno language server with your editor:
-// https://deno.land/manual/getting_started/setup_your_environment
-// This enables autocomplete, go to definition, etc.
+import { serve } from 'https://deno.land/std@0.208.0/http/server.ts'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+console.log('🏅 init Daily Spend Result Function')
 
-console.log("Hello from Functions!")
+const supabase = createClient(
+  Deno.env.get('SUPABASE_URL') ?? '',
+  Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+)
 
 serve(async (req) => {
-  const { name } = await req.json()
-  const data = {
-    message: `Hello ${name}!`,
+  const payload: { time: string } = await req.json()
+
+  console.log('🧘🏻 Daily Spend Result Start Timestamp', payload.time)
+
+  try {
+    // const { data: allUsers, error: allUsersError } = await supabase
+    //   .from('profiles')
+    //   .select('id, heart_point')
+    
+    // if (allUsersError) throw allUsersError
+
+    // const refreshAllUsersHeart = allUsers.map((user) => {
+    //   return {
+    //     id: user.id,
+    //     heart_point: 10
+    //   }
+    // })
+
+    // console.log('🧘🏻 Be Refresh All Users Heart', refreshAllUsersHeart)
+
+    // const { data: response, error: responseError } = await supabase
+    //   .from('profiles')
+    //   .upsert(refreshAllUsersHeart)
+    //   .select()
+
+    // if (responseError) throw responseError
+
+    console.log('🐬 After Refresh All Users Heart', response)
+
+    console.log('🎇 Finished Heart Schedule Function')
+
+    return new Response(JSON.stringify({ body: JSON.stringify(response) }), { status: 200 })
+  } catch (err) {
+    return new Response(JSON.stringify({ error: err.message }), { status: 400 })
   }
-
-  return new Response(
-    JSON.stringify(data),
-    { headers: { "Content-Type": "application/json" } },
-  )
 })
-
-// To invoke:
-// curl -i --location --request POST 'http://localhost:54321/functions/v1/' \
-//   --header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0' \
-//   --header 'Content-Type: application/json' \
-//   --data '{"name":"Functions"}'
