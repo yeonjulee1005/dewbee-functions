@@ -7,146 +7,275 @@ export type Json =
   | Json[]
 
 export type Database = {
-  filter: {
+  public: {
     Tables: {
-      currency: {
+      dailyResultList: {
         Row: {
-          code: string | null
-          code_name: string | null
           created_at: string
+          currency_id: string | null
           deleted: boolean | null
           id: string
-          index: number | null
+          summary_amount: number | null
           update_user_id: string | null
           updated_at: string | null
         }
         Insert: {
-          code?: string | null
-          code_name?: string | null
           created_at?: string
+          currency_id?: string | null
           deleted?: boolean | null
           id?: string
-          index?: number | null
+          summary_amount?: number | null
           update_user_id?: string | null
           updated_at?: string | null
         }
         Update: {
-          code?: string | null
-          code_name?: string | null
           created_at?: string
+          currency_id?: string | null
           deleted?: boolean | null
           id?: string
-          index?: number | null
+          summary_amount?: number | null
           update_user_id?: string | null
           updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dailyResultList_update_user_id_fkey"
+            columns: ["update_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dailyResultList_update_user_id_fkey"
+            columns: ["update_user_id"]
+            isOneToOne: false
+            referencedRelation: "viewProfiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          currency_id: string | null
+          deleted: boolean | null
+          email: string | null
+          end_date_id: string | null
+          id: string
+          nickname: string | null
+          plan_id: string | null
+          updated_at: string | null
+          weekly_target_amount: number | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          currency_id?: string | null
+          deleted?: boolean | null
+          email?: string | null
+          end_date_id?: string | null
+          id?: string
+          nickname?: string | null
+          plan_id?: string | null
+          updated_at?: string | null
+          weekly_target_amount?: number | null
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          currency_id?: string | null
+          deleted?: boolean | null
+          email?: string | null
+          end_date_id?: string | null
+          id?: string
+          nickname?: string | null
+          plan_id?: string | null
+          updated_at?: string | null
+          weekly_target_amount?: number | null
         }
         Relationships: []
       }
-      endDate: {
+      spendList: {
         Row: {
-          code: string | null
-          code_name: string | null
+          amount: number | null
           created_at: string
+          currency_id: string | null
           deleted: boolean | null
           id: string
-          index: number | null
+          spend_category_id: string | null
           update_user_id: string | null
           updated_at: string | null
         }
         Insert: {
-          code?: string | null
-          code_name?: string | null
+          amount?: number | null
           created_at?: string
+          currency_id?: string | null
           deleted?: boolean | null
           id?: string
-          index?: number | null
+          spend_category_id?: string | null
           update_user_id?: string | null
           updated_at?: string | null
         }
         Update: {
-          code?: string | null
-          code_name?: string | null
+          amount?: number | null
           created_at?: string
+          currency_id?: string | null
           deleted?: boolean | null
           id?: string
-          index?: number | null
+          spend_category_id?: string | null
           update_user_id?: string | null
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "spendList_update_user_id_fkey"
+            columns: ["update_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "spendList_update_user_id_fkey"
+            columns: ["update_user_id"]
+            isOneToOne: false
+            referencedRelation: "viewProfiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
-      plan: {
+      weeklyResultList: {
         Row: {
-          code: string | null
-          code_name: string | null
           created_at: string
+          currency_id: string | null
           deleted: boolean | null
+          end_date_id: string | null
           id: string
-          index: number | null
+          is_success: boolean | null
+          summary_amount: number | null
           update_user_id: string | null
           updated_at: string | null
         }
         Insert: {
-          code?: string | null
-          code_name?: string | null
           created_at?: string
+          currency_id?: string | null
           deleted?: boolean | null
+          end_date_id?: string | null
           id?: string
-          index?: number | null
+          is_success?: boolean | null
+          summary_amount?: number | null
           update_user_id?: string | null
           updated_at?: string | null
         }
         Update: {
-          code?: string | null
-          code_name?: string | null
           created_at?: string
+          currency_id?: string | null
           deleted?: boolean | null
+          end_date_id?: string | null
           id?: string
-          index?: number | null
+          is_success?: boolean | null
+          summary_amount?: number | null
           update_user_id?: string | null
           updated_at?: string | null
         }
-        Relationships: []
-      }
-      spendCategory: {
-        Row: {
-          code: string | null
-          code_name: string | null
-          created_at: string
-          deleted: boolean | null
-          icon_name: string | null
-          id: string
-          index: number | null
-          update_user_id: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          code?: string | null
-          code_name?: string | null
-          created_at?: string
-          deleted?: boolean | null
-          icon_name?: string | null
-          id?: string
-          index?: number | null
-          update_user_id?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          code?: string | null
-          code_name?: string | null
-          created_at?: string
-          deleted?: boolean | null
-          icon_name?: string | null
-          id?: string
-          index?: number | null
-          update_user_id?: string | null
-          updated_at?: string | null
-        }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "weeklyResultList_update_user_id_fkey"
+            columns: ["update_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "weeklyResultList_update_user_id_fkey"
+            columns: ["update_user_id"]
+            isOneToOne: false
+            referencedRelation: "viewProfiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
-      [_ in never]: never
+      viewDailyResultList: {
+        Row: {
+          created_at: string | null
+          currency: Json | null
+          currency_id: string | null
+          deleted: boolean | null
+          id: string | null
+          profiles: Json | null
+          summary_amount: number | null
+          update_user_id: string | null
+          updated_at: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dailyResultList_update_user_id_fkey"
+            columns: ["update_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dailyResultList_update_user_id_fkey"
+            columns: ["update_user_id"]
+            isOneToOne: false
+            referencedRelation: "viewProfiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      viewProfiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string | null
+          currency: Json | null
+          currency_id: string | null
+          deleted: boolean | null
+          email: string | null
+          end_date_id: string | null
+          endDate: Json | null
+          id: string | null
+          nickname: string | null
+          plan: Json | null
+          plan_id: string | null
+          updated_at: string | null
+          weekly_target_amount: number | null
+        }
+        Relationships: []
+      }
+      viewSpendList: {
+        Row: {
+          amount: number | null
+          created_at: string | null
+          currency: Json | null
+          currency_id: string | null
+          deleted: boolean | null
+          id: string | null
+          profiles: Json | null
+          spend_category_id: string | null
+          spendCategory: Json | null
+          update_user_id: string | null
+          updated_at: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "spendList_update_user_id_fkey"
+            columns: ["update_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "spendList_update_user_id_fkey"
+            columns: ["update_user_id"]
+            isOneToOne: false
+            referencedRelation: "viewProfiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       [_ in never]: never

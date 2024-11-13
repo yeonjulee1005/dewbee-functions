@@ -16,19 +16,13 @@ type UserProfiles = Database['public']['Views']['viewProfiles']['Row'] & {
   endDate: FilterDatabase['filter']['Tables']['endDate']['Row']
 }
 
-type ViewSpendList = Database['public']['Views']['viewSpendList']['Row'] & {
+type ViewDailyResultList = Database['public']['Views']['viewDailyResultList']['Row'] & {
   profiles: Database['public']['Tables']['profiles']['Row']
   currency: FilterDatabase['filter']['Tables']['currency']['Row']
-  spendCategory: FilterDatabase['filter']['Tables']['spendCategory']['Row']
 }
 
 serve(async (req) => {
   const payload: { time: string } = await req.json()
-
-  const date = new Date(payload.time)
-  date.setDate(date.getDate() - 1)
-
-  const yesterday = date.toISOString().split('T')[0]
 
   console.log('🧘🏻 Daily Spend Result Start Timestamp', payload.time)
 
@@ -40,53 +34,87 @@ serve(async (req) => {
     if (allUsersError) throw allUsersError
 
     for (const user of allUsers as UserProfiles[]) {
-      const userId = user.id
-      const userCurrencyId = user.currency.id ?? ''
-      const userCurrencyCode = user.currency.code ?? ''
+      const selectEndDate = user.endDate.code ?? 'EDC001'
 
-      const { data: spendList, error: spendListError } = await supabase
-        .from('viewSpendList')
-        .select('*')
-        .eq('update_user_id', userId)
-        .gte('created_at', yesterday.concat(' 00:00:00'))
-        .lte('created_at', yesterday.concat(' 23:59:59'))
+      const dayOfWeekMap = {
+        'EDC001': 1, // 월요일
+        'EDC002': 2, // 화요일
+        'EDC003': 3, // 수요일
+        'EDC004': 4, // 목요일
+        'EDC005': 5, // 금요일
+        'EDC006': 6, // 토요일
+        'EDC007': 0, // 일요일
+      }
 
-      if (spendListError) throw spendListError
+      const targetDayOfWeek = dayOfWeekMap[selectEndDate]
 
-      if (spendList.length === 0) {
-        console.log('🐬 No Spend Data / User Name', user.nickname)
+      const payloadDate = new Date(payload.time)
+      const isSameDayOfWeek: Boolean = payloadDate.getDay() === targetDayOfWeek
+
+      if (!isSameDayOfWeek) {
+        console.log('🐬 Not Same Day Of Week / User Name', user.nickname)
         continue
       }
 
-      let dailySummaryAmount = 0
+      const searchEndDate = isSameDayOfWeek ? new Date().toISOString().split('T')[0].concat(' 00:00:00') : null
+      const oneWeekBeforeDate = isSameDayOfWeek ? new Date(payloadDate.setDate(payloadDate.getDate() - 7)).toISOString().split('T')[0].concat(' 00:00:00') : null
 
-      for (const spend of spendList as ViewSpendList[]) {
-        const amount = spend.amount ?? 0
+      console.log('🐬 One Week Before Date', oneWeekBeforeDate)
+      console.log('🐬 Search End Date', searchEndDate)
+
+      const userId = user.id
+      const userWeeklyTargetAmount = user.weekly_target_amount ?? 0
+      const userCurrencyId = user.currency.id ?? ''
+      const userCurrencyCode = user.currency.code ?? ''
+      const userEndDateId = user.end_date_id ?? ''
+
+      const { data: dailyResultList, error: dailyResultListError } = await supabase
+        .from('viewDailyResultList')
+        .select('*')
+        .eq('update_user_id', userId)
+        .gte('created_at', oneWeekBeforeDate)
+        .lte('created_at', searchEndDate)
+
+      if (dailyResultListError) throw dailyResultListError
+
+      if (dailyResultList.length === 0) {
+        console.log('🐬 No Spend This Week / User Name', user.nickname)
+        continue
+      }
+
+      console.log('🐬 Daily Result List', dailyResultList)
+
+      let weeklySummaryAmount = 0
+
+      for (const spend of dailyResultList as ViewDailyResultList[]) {
+        const amount = spend.summary_amount ?? 0
         const currencyCode = spend.currency.code ?? ''
 
         const convertedAmount = (await convertCurrency(amount, currencyCode, userCurrencyCode)).amount
 
-        dailySummaryAmount += convertedAmount
+        weeklySummaryAmount += convertedAmount
       }
 
       const createPayload = {
-        summary_amount: dailySummaryAmount.toFixed(2),
+        summary_amount: weeklySummaryAmount.toFixed(2),
+        is_success: userWeeklyTargetAmount >= weeklySummaryAmount,
         currency_id: userCurrencyId,
+        end_date_id: userEndDateId,
         update_user_id: userId,
       }
 
-      const { data: response, error: dailyResultListError } = await supabase
-        .from('dailyResultList')
+      const { data: response, error: weeklyResultListError } = await supabase
+        .from('weeklyResultList')
         .upsert(createPayload)
         .select()
 
-      if (dailyResultListError) throw dailyResultListError
+      if (weeklyResultListError) throw weeklyResultListError
 
       console.log('🐬 Result Create Success / User Name', user.nickname)
       console.log('🐬 Result Create Success / response', response)
     }
 
-    console.log('🎇 Finished Create Daily Result Function')
+    console.log('🎇 Finished Create Weekly Result Function')
 
     return new Response(JSON.stringify({ body: JSON.stringify(payload.time) }), { status: 200 })
   } catch (err) {
