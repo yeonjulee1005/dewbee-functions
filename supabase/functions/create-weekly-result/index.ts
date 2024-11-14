@@ -98,6 +98,7 @@ serve(async (req) => {
       const createPayload = {
         summary_amount: weeklySummaryAmount.toFixed(2),
         is_success: userWeeklyTargetAmount >= weeklySummaryAmount,
+        weekly_target_amount: userWeeklyTargetAmount,
         currency_id: userCurrencyId,
         end_date_id: userEndDateId,
         update_user_id: userId,
