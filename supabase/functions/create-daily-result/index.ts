@@ -14,6 +14,7 @@ const supabase = createClient(
 type UserProfiles = Database['public']['Views']['viewProfiles']['Row'] & {
   currency: FilterDatabase['filter']['Tables']['currency']['Row']
   endDate: FilterDatabase['filter']['Tables']['endDate']['Row']
+  localTimezone: FilterDatabase['filter']['Tables']['localTimezone']['Row']
 }
 
 type ViewSpendList = Database['public']['Views']['viewSpendList']['Row'] & {
@@ -43,13 +44,19 @@ serve(async (req) => {
       const userId = user.id
       const userCurrencyId = user.currency.id ?? ''
       const userCurrencyCode = user.currency.code ?? ''
+      const userLocalTimezoneOffset = user.localTimezone.utc_offset ?? 0
+
+      const startSearchDate = adjustTimezone(yesterday.concat('T00:00:00.000Z'), userLocalTimezoneOffset)
+      const endSearchDate = adjustTimezone(yesterday.concat('T23:59:59.000Z'), userLocalTimezoneOffset)
+
+      console.log('🔎 Search Date Range', startSearchDate, endSearchDate)
 
       const { data: spendList, error: spendListError } = await supabase
         .from('viewSpendList')
         .select('*')
         .eq('update_user_id', userId)
-        .gte('created_at', yesterday.concat(' 00:00:00'))
-        .lte('created_at', yesterday.concat(' 23:59:59'))
+        .gte('created_at', startSearchDate)
+        .lte('created_at', endSearchDate)
 
       if (spendListError) throw spendListError
 
@@ -93,6 +100,12 @@ serve(async (req) => {
     return new Response(JSON.stringify({ error: err.message }), { status: 400 })
   }
 })
+
+function adjustTimezone (dateString: string, offset: number) {
+  const date = new Date(dateString)
+  date.setHours(date.getHours() - offset)
+  return date.toISOString().replace('T', ' ').split('.')[0]
+}
 
 async function convertCurrency(amount: number, amountCurrency: string, userCurrency: string) {
   const resUsd: any = await fetch('https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json')

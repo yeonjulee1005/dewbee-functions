@@ -14,6 +14,7 @@ const supabase = createClient(
 type UserProfiles = Database['public']['Views']['viewProfiles']['Row'] & {
   currency: FilterDatabase['filter']['Tables']['currency']['Row']
   endDate: FilterDatabase['filter']['Tables']['endDate']['Row']
+  localTimezone: FilterDatabase['filter']['Tables']['localTimezone']['Row']
 }
 
 type ViewDailyResultList = Database['public']['Views']['viewDailyResultList']['Row'] & {
@@ -34,6 +35,7 @@ serve(async (req) => {
     if (allUsersError) throw allUsersError
 
     for (const user of allUsers as UserProfiles[]) {
+      const userLocalTimezoneOffset = user.localTimezone.utc_offset ?? 0
       const selectEndDate = user.endDate.code ?? 'EDC001'
 
       const dayOfWeekMap = {
@@ -56,11 +58,10 @@ serve(async (req) => {
         continue
       }
 
-      const searchEndDate = isSameDayOfWeek ? new Date().toISOString().split('T')[0].concat(' 00:00:00') : null
-      const oneWeekBeforeDate = isSameDayOfWeek ? new Date(payloadDate.setDate(payloadDate.getDate() - 7)).toISOString().split('T')[0].concat(' 00:00:00') : null
+      const searchEndDate = isSameDayOfWeek ? adjustTimezone(new Date().toISOString().split('T')[0].concat('T00:00:00.000Z'), userLocalTimezoneOffset) : null
+      const oneWeekBeforeDate = isSameDayOfWeek ? adjustTimezone(new Date(payloadDate.setDate(payloadDate.getDate() - 7)).toISOString().split('T')[0].concat('T00:00:00.000Z'), userLocalTimezoneOffset) : null
 
-      console.log('🐬 One Week Before Date', oneWeekBeforeDate)
-      console.log('🐬 Search End Date', searchEndDate)
+      console.log('🔎 Search Date Range', oneWeekBeforeDate, searchEndDate)
 
       const userId = user.id
       const userWeeklyTargetAmount = user.weekly_target_amount ?? 0
@@ -122,6 +123,12 @@ serve(async (req) => {
     return new Response(JSON.stringify({ error: err.message }), { status: 400 })
   }
 })
+
+function adjustTimezone (dateString: string, offset: number) {
+  const date = new Date(dateString)
+  date.setHours(date.getHours() - offset)
+  return date.toISOString().replace('T', ' ').split('.')[0]
+}
 
 async function convertCurrency(amount: number, amountCurrency: string, userCurrency: string) {
   const resUsd: any = await fetch('https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json')
