@@ -58,8 +58,8 @@ serve(async (req) => {
         continue
       }
 
-      const searchEndDate = isSameDayOfWeek ? adjustTimezone(new Date().toISOString().split('T')[0].concat('T00:00:00.000Z'), userLocalTimezoneOffset) : null
-      const oneWeekBeforeDate = isSameDayOfWeek ? adjustTimezone(new Date(payloadDate.setDate(payloadDate.getDate() - 7)).toISOString().split('T')[0].concat('T00:00:00.000Z'), userLocalTimezoneOffset) : null
+      const searchEndDate = adjustTimezone(new Date(payloadDate.setDate(payloadDate.getDate() + 1)).toISOString().split('T')[0].concat('T00:00:00.000Z'), userLocalTimezoneOffset)
+      const oneWeekBeforeDate = adjustTimezone(new Date(payloadDate.setDate(payloadDate.getDate() - 6)).toISOString().split('T')[0].concat('T00:00:00.000Z'), userLocalTimezoneOffset)
 
       console.log('🔎 Search Date Range', oneWeekBeforeDate, searchEndDate)
 
